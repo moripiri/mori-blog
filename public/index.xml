@@ -14,25 +14,11 @@
     <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>How I built this blog</title>
+      <title>이거 어떻게 만든 거에요?</title>
       <link>http://localhost:1313/posts/my-first-post/</link>
       <pubDate>Sun, 22 Jun 2025 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/posts/my-first-post/</guid>
-      <description>&lt;h2 id=&#34;hugo&#34;&gt;Hugo&lt;/h2&gt;
-&lt;p&gt;Since I&amp;rsquo;ve decided to make a blog, I chose to follow &lt;a href=&#34;https://lilianweng.github.io/&#34;&gt;Lilian Weng&amp;rsquo;s Blog&lt;/a&gt; which I&amp;rsquo;ve been reading for few years.&lt;/p&gt;
-&lt;p&gt;So, I installed &lt;a href=&#34;https://gohugo.io&#34;&gt;Hugo&lt;/a&gt; and &lt;a href=&#34;https://themes.gohugo.io/themes/hugo-papermod/&#34;&gt;PaperMod&lt;/a&gt; in a few minutes.&lt;/p&gt;
-&lt;h3 id=&#34;hugo-installation--create-new-project&#34;&gt;Hugo installation &amp;amp; Create New Project&lt;/h3&gt;
-&lt;p&gt;I&amp;rsquo;ve followed instructions in &lt;a href=&#34;https://github.com/adityatelange/hugo-PaperMod/wiki/Installation&#34;&gt;PaperMod installation guide&lt;/a&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;brew install hugo --format yaml
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hugo new site mori-blog
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; mori-blog
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git init
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git submodule add --depth&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git submodule update --init --recursive 
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;theme = &amp;#39;PaperMod&amp;#39;&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; hugo.toml
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hugo server
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;set-hugoyaml&#34;&gt;Set &lt;code&gt;hugo.yaml&lt;/code&gt;&lt;/h3&gt;
-&lt;p&gt;Changed site settings by using default &lt;code&gt;hugo.yml&lt;/code&gt; that &lt;strong&gt;PaperMod&lt;/strong&gt; suggests.&lt;/p&gt;</description>
+      <description>Hugo로 빠르게 블로그 만들기</description>
     </item>
   </channel>
 </rss>

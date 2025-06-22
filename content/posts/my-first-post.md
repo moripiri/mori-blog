@@ -1,17 +1,23 @@
-+++
-title = 'How I built this blog'
-date = 2025-06-22
-draft = false
-+++
+---
+title: '이거 어떻게 만든 거에요?'
+date: 2025-06-22
+draft: false
+tags: ["hugo"]
+ShowRssButtonInSectionTermList: false
+ShowToc: true
+ShowBreadCrumbs: false
+description: "Hugo로 빠르게 블로그 만들기"
+
+---
 
 ## Hugo 
 
-Since I've decided to make a blog, I chose to follow [Lilian Weng's Blog](https://lilianweng.github.io/) which I've been reading for few years.
+블로그를 만들고 싶어 내가 몇 년 동안 많이 읽었던 [Lilian Weng's Blog](https://lilianweng.github.io/) 를 참고하기로 했다.
+<!--more-->
+그래서 먼저 [Hugo](https://gohugo.io) 를 설치하고 [PaperMod](https://themes.gohugo.io/themes/hugo-papermod/) 를 찾아놓았다. 
 
-So, I installed [Hugo](https://gohugo.io) and [PaperMod](https://themes.gohugo.io/themes/hugo-papermod/) in a few minutes. 
-
-### Hugo installation & Create New Project
-I've followed instructions in [PaperMod installation guide](https://github.com/adityatelange/hugo-PaperMod/wiki/Installation).
+### Hugo 설치 & Create New Project
+설치 가이드로 [PaperMod installation guide](https://github.com/adityatelange/hugo-PaperMod/wiki/Installation)를 참고했다.
 
 ```bash
 brew install hugo --format yaml
@@ -24,9 +30,9 @@ echo "theme = 'PaperMod'" >> hugo.toml
 hugo server
 ```
 
-### Set `hugo.yaml`
+### `hugo.yaml` 세팅
 
-Changed site settings by using default `hugo.yml` that **PaperMod** suggests.
+`hugo.yml` 세팅으론 **PaperMod**가 주는 걸 참고했다.
 
 ```yaml
 baseURL: "https://examplesite.com/"
@@ -167,11 +173,11 @@ markup:
     # lineNos: true
     # style: monokai
 ```
-You can change default values to yours.
+개인적인 것만 바꾸면 세팅 완료이다.
 
-### Set default post
+### 기본 포스트 형식 세팅
 
-Create `archetypes/post.md` as follwing:
+`archetypes/post.md`를 다음과 같이 만들었다.
 
 ```yaml
 ---
@@ -212,18 +218,18 @@ editPost:
 ---
 ```
 
-You can use it by creating `archetypes/post.md`
+이 형식으로 post를 만들려면 다음을 사용하면 된다.
 ```bash
 hugo new --kind post <name>
 ```
 
-### Deploy in Github Pages
-I've chosen github pages to deploy the site. Hugo recommends using [`Github Actions`](https://gohugo.io/host-and-deploy/host-on-github-pages/) to deploy in github pages.
+### Github Pages에 deploy하기
+믿음의 Github Pages를 사용해서 deploy하기로 했는데, Hugo는 [`Github Actions`](https://gohugo.io/host-and-deploy/host-on-github-pages/)를 사용하는 걸 추천해서 이걸 사용했다. 
+가이드 대로 github actions를 설정해주면 끝.
 
 ![github action](images/my-first-post_1.png)
 
-Then it's done.
-
+그럼 완료이다.
 
 
 
