@@ -44,9 +44,9 @@ params:
   assets:
     # disableHLJS: true # to disable highlight.js
     # disableFingerprinting: true
-    favicon: "assets/favicons/favicon.ico"
-    favicon16x16: "assets/favicons/favicon-16x16.ico"
-    favicon32x32: "assets/favicons/favicon-32x32.ico"
+    favicon: "static/favicons/favicon.ico"
+    favicon16x16: "static/favicons/favicon-16x16.ico"
+    favicon32x32: "static/favicons/favicon-32x32.ico"
     apple_touch_icon: "<link / abs url>"
     safari_pinned_tab: "<link / abs url>"
 
@@ -122,10 +122,15 @@ menu:
       name: tags
       url: /tags/
       weight: 20
-    - identifier: example
-      name: example.org
-      url: https://example.org
+    - identifier: search
+      name: search
+      url: /search/
       weight: 30
+
+#    - identifier: example
+#      name: example.org
+#      url: https://example.org
+#      weight: 30
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:

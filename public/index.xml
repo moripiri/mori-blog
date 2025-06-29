@@ -20,5 +20,12 @@
       <guid>http://localhost:1313/posts/my-first-post/</guid>
       <description>Hugo로 빠르게 블로그 만들기</description>
     </item>
+    <item>
+      <title>Sutton의 RL 책 한 장 요약</title>
+      <link>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</link>
+      <pubDate>Sun, 15 Jun 2025 11:30:03 +0000</pubDate>
+      <guid>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</guid>
+      <description>한 페이지로 보는 Sutton의 RL 책</description>
+    </item>
   </channel>
 </rss>
