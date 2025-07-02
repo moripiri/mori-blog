@@ -227,6 +227,7 @@ hugo new --kind post <name>
 믿음의 Github Pages를 사용해서 deploy하기로 했는데, Hugo는 [`Github Actions`](https://gohugo.io/host-and-deploy/host-on-github-pages/)를 사용하는 걸 추천해서 이걸 사용했다. 
 가이드 대로 github actions를 설정해주면 끝.
 
+
 ![github action](images/my-first-post_1.png)
 
 그럼 완료이다.

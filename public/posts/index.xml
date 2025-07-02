@@ -14,18 +14,18 @@
     <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>이거 어떻게 만든 거에요?</title>
-      <link>http://localhost:1313/posts/my-first-post/</link>
-      <pubDate>Sun, 22 Jun 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/my-first-post/</guid>
-      <description>Hugo로 빠르게 블로그 만들기</description>
-    </item>
-    <item>
       <title>Sutton의 RL 책 한 장 요약</title>
       <link>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</link>
       <pubDate>Sun, 15 Jun 2025 11:30:03 +0000</pubDate>
       <guid>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</guid>
       <description>한 페이지로 보는 Sutton의 RL 책</description>
+    </item>
+    <item>
+      <title>이거 어떻게 만든 거에요?</title>
+      <link>http://localhost:1313/posts/my-first-post/</link>
+      <pubDate>Sun, 22 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/my-first-post/</guid>
+      <description>Hugo로 빠르게 블로그 만들기</description>
     </item>
   </channel>
 </rss>
