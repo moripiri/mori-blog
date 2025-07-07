@@ -38,7 +38,7 @@ editPost:
 <!--more-->
 
 ## Introduction
-Reinforcement Learning: An area of machine learning that aims to learn what to do to
+Reinforcement Learning: An area of machine learning that aims to learn what to do to maximize cumulative reward.
 
 ### Agents and Environments
 
@@ -46,26 +46,26 @@ Reinforcement Learning: An area of machine learning that aims to learn what to d
  <img src = "images/agent_environment.png">
 </p>
 
-At each timestep $t$ 
-*  **Agents**: Receives Reward $R_t$ and Observation $O_t$, executes Action $A_t$
-* **Environments**: Receives Action $A_t$, then emits Reward $R_{t+1}$ and Next Observation $O_{t+1}$ 
+At each timestep $t$:
+*  **Agents**: Receive Reward $R_t$ and Observation $O_t$, execute Action $A_t$
+* **Environments**: Receive Action $A_t$, then emit Reward $R_{t+1}$ and Next Observation $O_{t+1}$ 
 
-The sequence of observations, actions, rewards are called history.</br>
+The sequence of observations, actions, and rewards is called history.</br>
 
 $$\begin{aligned}
 H_t = O_1, R_1, A_1, ... , A_{t-1}, O_t, R_t
 \end{aligned}$$
 </br>
 </br>
-**State**$(S_t)$: information used to determine what happens next. Both agent and environment have state, and it may not agree with each other
+**State**$(S_t)$: information used to determine what happens next. Both the agent and environment have state, and they may not agree with each other.
 
-* **Fully observable environments**: $O_t = S_t$. Agent can know exact state of the environment. It is called **markov decision process (MDP)**
-* **Partially observable environments**: $O_t \neq S_t$. Agent only know partial state of the environment. It is called **partially observable markov decision process (POMDP)**
+* **Fully observable environments**: $O_t = S_t$. The agent can know the exact state of the environment. It is called a **Markov Decision Process (MDP)**
+* **Partially observable environments**: $O_t \neq S_t$. The agent only knows the partial state of the environment. It is called a **Partially Observable Markov Decision Process (POMDP)**
 
 
 ### Markov Decision Processes (MDP)
 
-**Markov Decision Process (MDP)** is an environment that can be defined as 5-tuple:
+**Markov Decision Process (MDP)** is an environment that can be defined as a 5-tuple:
 
 $$\begin{aligned}
 (\mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma)
@@ -115,7 +115,7 @@ q_\pi(s, a) = \mathbb{E_\pi}[G_t|S_t = s, A_t = a]
 
 #### Bellman equation
 
-Let’s derive the Bellman expectation equation for $v_\pi(s)$.
+Let's derive the Bellman expectation equation for $v_\pi(s)$.
 
 $$
 \begin{aligned}
@@ -168,13 +168,13 @@ q_*(s, a) = \mathbb{E_\pi}[R_{t+1} + \gamma \max_{a'} q_\ast (S_{t+1}, a')|S_t =
 
 ### What is Dynamic Programming?
 
-**Dynamic programming (DP)**: collection of algorithms that can be used to compute optimal **policies** given a perfect model such as a **Markov Decision Process (MDP).**
+**Dynamic programming (DP)**: a collection of algorithms that can be used to compute optimal **policies** given a perfect model such as a **Markov Decision Process (MDP).**
 
 DP can solve problems that have two properties:
 
 1. **Overlapping subproblems**
-    * Problem can be broken down to subproblems 
-    * Solution to subproblems can be reused
+    * Problem can be broken down into subproblems 
+    * Solutions to subproblems can be reused
 2. **Optimal substructure**
     * Problem can be decomposed into subproblems
 
@@ -215,9 +215,9 @@ Model-free control algorithms can be divided into two groups: on-policy control 
 
 - **On-policy control**: Learn about policy $\pi$ from experience sampled from $\pi$
 
-- **Off-policy control**: Learn about policy from $\pi$ from experience sampled from policy $\mu \neq \pi$ 
+- **Off-policy control**: Learn about policy $\pi$ from experience sampled from policy $\mu \neq \pi$ 
 
-Both type of control algorithms are widely utilized in RL.
+Both types of control algorithms are widely utilized in RL.
 
 ### On-policy Monte-Carlo Control
 <p align="center">
@@ -242,19 +242,19 @@ $$\begin{align}
 \theta_{t+1} = \theta_t + \alpha \nabla \mathcal{J}(\theta_t)
 \end{align}$$
 
-where $\alpha$ is a step-size parameter..
+where $\alpha$ is a step-size parameter.
 
-Then what can be the performance measure $\mathcal{J}(\theta)$ for MDP policy in finite episode?
+Then what can be the performance measure $\mathcal{J}(\theta)$ for an MDP policy in finite episodes?
 
-In episodic case trajectory $\tau$. Then, we can define $\mathcal{J}(\theta)$ as its value.
+In the episodic case, we have trajectory $\tau$. Then, we can define $\mathcal{J}(\theta)$ as its value.
 
 $$\begin{align}
 \mathcal{J}(\theta) = \sum_{s \in \mathcal{S}} d^\pi(s)v_\pi(s) = \sum_{s \in \mathcal{S}} d^\pi(s) \sum_{a \in \mathcal{A}} \pi_\theta(a|s) q_\pi(s, a)
 \end{align}$$
 
-where $d^\pi$ is the stationary distribution for Markov chain for $\pi_\theta$.
+where $d^\pi$ is the stationary distribution for the Markov chain for $\pi_\theta$.
 
-Then gradient of $\mathcal{J}$ can be reformatted as the following:
+Then the gradient of $\mathcal{J}$ can be reformatted as the following:
 
 $$\begin{aligned}
 \nabla_\theta \mathcal{J}(\theta) &= \nabla_\theta \sum_{s \in \mathcal{S}} d^\pi(s) \sum_{a \in \mathcal{A}} \pi_\theta(a|s) Q_\pi(s, a) & \\\
@@ -264,7 +264,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 
-where $\mathbb{E_\pi}$ refers to $\mathbb{E_{s \sim d_\pi, a \sim \pi_\theta}}$ and $Q_\pi$ means **true state-value** under policy $\pi$. 
+where $\mathbb{E_\pi}$ refers to $\mathbb{E_{s \sim d_\pi, a \sim \pi_\theta}}$ and $Q_\pi$ means the **true state-value** under policy $\pi$. 
 
 
 ### Policy Based Reinforcement Learning
@@ -281,15 +281,15 @@ $$\begin{align}
 
 ### Actor-Critic Policy Gradient
 
-Yet the algorithm **REINFORCE** has a disadvantage in high gradient variance. 
-.
-Thus, to reduce variance **critic** can be used instead of **return** to estimate $Q_\pi$.
+Yet the algorithm **REINFORCE** has a disadvantage of high gradient variance. 
+
+Thus, to reduce variance, a **critic** can be used instead of **return** to estimate $Q_\pi$.
 
 $$\begin{align}
 q_\phi (s, a) = Q_\pi(s, a)
 \end{align}$$
 
-Therefore policy gradient is changed as
+Therefore, the policy gradient is changed as
 
 $$\begin{align}
 \nabla_\theta \mathcal{J}(\theta) = \mathbb{E_\pi} [q_\phi(s,a) \nabla_\theta \log \pi_\theta(s,a)]\\
@@ -302,7 +302,7 @@ Critic can be updated by
 - TD(0)
 - TD($\lambda$)
 
-For example, if we use TD(0), then in timestep $t$ critic will be updated as
+For example, if we use TD(0), then in timestep $t$ the critic will be updated as
 
 $$\begin{align}
 \phi \leftarrow \phi + \beta (r_t + \gamma q_\phi(s_{t+1}, a_{t+1}) - q_\phi(s_t, a_t)) \nabla_\phi q_\phi(s_t, a_t)
@@ -315,20 +315,20 @@ $$\begin{align}
 
 
 ## Model-based Reinforcement Learning
- **model-based RL**: it learns model from experience, and plan value function and(or) policy from model.
+ **Model-based RL**: it learns a model from experience and plans value function and/or policy from the model.
 
 ### What is a Model?
 
-A *Model* $\mathcal{M}$ is a representation of an MDP <$\mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}$> parametrized by $\eta$. Assuming we know state space $\mathcal{S}$ and action space $\mathcal{A}$, a model $<\mathcal{P}, \mathcal{R}>$ can represent transitions
+A *Model* $\mathcal{M}$ is a representation of an MDP <$\mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}$> parametrized by $\eta$. Assuming we know the state space $\mathcal{S}$ and action space $\mathcal{A}$, a model $<\mathcal{P}, \mathcal{R}>$ can represent transitions
 
 $$\begin{align}
 S_{t+1} \sim \mathcal{P_\eta(S_{t+1}|S_t, A_t)} \\\
 R_{t+1} \sim \mathcal{R_\eta(R_{t+1}|S_t, A_t)}
 \end{align}$$
 
-model $<\mathcal{P}, \mathcal{R}>$ is learned from experience ${S_1, A_1, R_2, ... , S_T}$.
+The model $<\mathcal{P}, \mathcal{R}>$ is learned from experience ${S_1, A_1, R_2, ... , S_T}$.
 
-Model can be parametrized in various ways: from lookup table models to deep neural networks.
+A model can be parametrized in various ways: from lookup table models to deep neural networks.
 
 <p align="center">
  <img src = "images/dyna_pseudocode.png">

@@ -12,9 +12,9 @@ description: "Hugo로 빠르게 블로그 만들기"
 
 ## Hugo 
 
-블로그를 만들고 싶어 내가 몇 년 동안 많이 읽었던 [Lilian Weng's Blog](https://lilianweng.github.io/) 를 참고하기로 했다.
+블로그를 만들고 싶어서 내가 몇 년 동안 많이 읽었던 [Lilian Weng's Blog](https://lilianweng.github.io/)를 참고하기로 했다.
 <!--more-->
-그래서 먼저 [Hugo](https://gohugo.io) 를 설치하고 [PaperMod](https://themes.gohugo.io/themes/hugo-papermod/) 를 찾아놓았다. 
+그래서 먼저 [Hugo](https://gohugo.io)를 설치하고 [PaperMod](https://themes.gohugo.io/themes/hugo-papermod/)를 찾아놓았다. 
 
 ### Hugo 설치 & Create New Project
 설치 가이드로 [PaperMod installation guide](https://github.com/adityatelange/hugo-PaperMod/wiki/Installation)를 참고했다.
@@ -32,7 +32,7 @@ hugo server
 
 ### `hugo.yaml` 세팅
 
-`hugo.yml` 세팅으론 **PaperMod**가 주는 걸 참고했다.
+`hugo.yml` 세팅은 **PaperMod**가 제공하는 것을 참고했다.
 
 ```yaml
 baseURL: "https://examplesite.com/"
@@ -173,7 +173,7 @@ markup:
     # lineNos: true
     # style: monokai
 ```
-개인적인 것만 바꾸면 세팅 완료이다.
+개인적인 것만 바꾸면 세팅이 완료된다.
 
 ### 기본 포스트 형식 세팅
 
@@ -224,8 +224,8 @@ hugo new --kind post <name>
 ```
 
 ### Github Pages에 deploy하기
-믿음의 Github Pages를 사용해서 deploy하기로 했는데, Hugo는 [`Github Actions`](https://gohugo.io/host-and-deploy/host-on-github-pages/)를 사용하는 걸 추천해서 이걸 사용했다. 
-가이드 대로 github actions를 설정해주면 끝.
+믿음직한 Github Pages를 사용해서 deploy하기로 했는데, Hugo는 [`Github Actions`](https://gohugo.io/host-and-deploy/host-on-github-pages/)를 사용하는 것을 추천해서 이것을 사용했다. 
+가이드 대로 github actions를 설정해주면 끝이다.
 
 
 ![github action](images/my-first-post_1.png)
