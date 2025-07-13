@@ -2,60 +2,60 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</loc>
+    <loc>http://localhost:64609/posts/sutton-rl-book-cheatsheet/</loc>
     <lastmod>2025-06-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/hugo/</loc>
+    <loc>http://localhost:64609/tags/hugo/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>http://localhost:64609/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
+    <loc>http://localhost:64609/posts/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>http://localhost:64609/tags/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/my-first-post/</loc>
+    <loc>http://localhost:64609/posts/my-first-post/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/rl/</loc>
+    <loc>http://localhost:64609/tags/rl/</loc>
     <lastmod>2025-06-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/first/</loc>
+    <loc>http://localhost:64609/tags/first/</loc>
     <lastmod>2020-09-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/vibe-coding-game/post/</loc>
+    <loc>http://localhost:64609/posts/vibe-coding-game/post/</loc>
     <lastmod>2020-09-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/vibe-coding-game/game_architecture/</loc>
+    <loc>http://localhost:64609/posts/vibe-coding-game/game_architecture/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>http://localhost:64609/categories/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>http://localhost:64609/search/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>

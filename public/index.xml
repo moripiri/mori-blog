@@ -2,43 +2,43 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>mori-blog</title>
-    <link>http://localhost:64609/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on mori-blog</description>
     <image>
       <title>mori-blog</title>
-      <url>http://localhost:64609/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>http://localhost:64609/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+      <url>http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- 0.147.8</generator>
     <language>en</language>
     <lastBuildDate>Sun, 22 Jun 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:64609/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Sutton의 RL 책 한 장 요약</title>
-      <link>http://localhost:64609/posts/sutton-rl-book-cheatsheet/</link>
+      <link>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</link>
       <pubDate>Sun, 15 Jun 2025 11:30:03 +0000</pubDate>
-      <guid>http://localhost:64609/posts/sutton-rl-book-cheatsheet/</guid>
+      <guid>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</guid>
       <description>한 페이지로 보는 Sutton의 RL 책</description>
     </item>
     <item>
       <title>이거 어떻게 만든 거에요?</title>
-      <link>http://localhost:64609/posts/my-first-post/</link>
+      <link>http://localhost:1313/posts/my-first-post/</link>
       <pubDate>Sun, 22 Jun 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:64609/posts/my-first-post/</guid>
+      <guid>http://localhost:1313/posts/my-first-post/</guid>
       <description>Hugo로 빠르게 블로그 만들기</description>
     </item>
     <item>
       <title>My 1st post</title>
-      <link>http://localhost:64609/posts/vibe-coding-game/post/</link>
+      <link>http://localhost:1313/posts/vibe-coding-game/post/</link>
       <pubDate>Tue, 15 Sep 2020 11:30:03 +0000</pubDate>
-      <guid>http://localhost:64609/posts/vibe-coding-game/post/</guid>
+      <guid>http://localhost:1313/posts/vibe-coding-game/post/</guid>
       <description>Desc Text.</description>
     </item>
     <item>
       <title></title>
-      <link>http://localhost:64609/posts/vibe-coding-game/game_architecture/</link>
+      <link>http://localhost:1313/posts/vibe-coding-game/game_architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:64609/posts/vibe-coding-game/game_architecture/</guid>
+      <guid>http://localhost:1313/posts/vibe-coding-game/game_architecture/</guid>
       <description>&lt;h1 id=&#34;number-game-react--fastapi로-만든-퍼즐-게임-아키텍처-분석&#34;&gt;Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석&lt;/h1&gt;
 &lt;h2 id=&#34;-프로젝트-개요&#34;&gt;🎮 프로젝트 개요&lt;/h2&gt;
 &lt;p&gt;Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.&lt;/p&gt;

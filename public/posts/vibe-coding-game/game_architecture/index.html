@@ -1,0 +1,550 @@
+<!doctype html><html lang=en dir=auto><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=64609&amp;path=livereload" data-no-instant defer></script><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>mori-blog</title><meta name=keywords content><meta name=description content='Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석
+🎮 프로젝트 개요
+Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.
+🏗️ 전체 아키텍처
+┌─────────────────┐    HTTP API    ┌─────────────────┐
+│   React Frontend │ ◄────────────► │  FastAPI Backend │
+│                 │                │                 │
+│ • Game UI       │                │ • Game Logic    │
+│ • State Mgmt    │                │ • Board Creation │
+│ • Animations    │                │ • Validation    │
+│ • LocalStorage  │                │ • Stateless     │
+└─────────────────┘                └─────────────────┘
+📁 프로젝트 구조
+number_game/
+├── frontend/                 # React 애플리케이션
+│   ├── src/
+│   │   ├── App.jsx          # 메인 컴포넌트
+│   │   ├── components/      # UI 컴포넌트들
+│   │   │   ├── Board.jsx    # 게임 보드
+│   │   │   ├── NumberCell.jsx # 개별 숫자 셀
+│   │   │   └── Controls.jsx # 게임 컨트롤
+│   │   ├── api/
+│   │   │   └── gameApi.js   # API 통신
+│   │   └── utils/
+│   │       └── soundEffects.js # 사운드 효과
+│   └── package.json
+├── backend/                  # FastAPI 서버
+│   ├── app/
+│   │   ├── main.py          # API 엔드포인트
+│   │   ├── game_logic.py    # 게임 규칙 로직
+│   │   └── models.py        # 데이터 모델
+│   └── requirements.txt
+└── README.md
+🎯 핵심 기술 스택
+Frontend
+
+React 18.2.0: 컴포넌트 기반 UI
+CSS: 스타일링 및 애니메이션
+LocalStorage: 게임 상태 영속성
+
+Backend
+
+FastAPI: 고성능 Python 웹 프레임워크
+Pydantic: 데이터 검증 및 직렬화
+Uvicorn: ASGI 서버
+
+🔧 핵심 기능 분석
+1. 게임 로직 (Backend)
+보드 생성 알고리즘
+def create_initial_board() -> List[List[Optional[int]]]:
+    # 1-9까지 각 숫자를 최소 2번씩 보장
+    numbers = [i for i in range(1, 10)] * 2
+    
+    # 나머지 17개 숫자를 랜덤으로 추가
+    remaining_numbers = [random.randint(1, 9) for _ in range(17)]
+    numbers.extend(remaining_numbers)
+    
+    # 3행 9열 + 1행 8열 구조로 배치
+    board = []
+    for i in range(3):
+        board.append(numbers[i*9:(i+1)*9])
+    board.append(numbers[27:35])
+    return board
+매칭 검증 로직
+def can_remove(board, pos1, pos2) -> bool:
+    # 1. 같은 숫자이거나 합이 10인지 확인
+    if num1 != num2 and num1 + num2 != 10:
+        return False
+    
+    # 2. 인접하거나 경로가 막히지 않았는지 확인
+    return is_adjacent_or_clear_path(board, pos1, pos2)
+2. 상태 관리 (Frontend)
+LocalStorage 기반 영속성
+const saveGameState = (gameState) => {
+  localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(gameState));
+};
+
+const loadGameState = () => {
+  const savedState = localStorage.getItem(GAME_STORAGE_KEY);
+  return savedState ? JSON.parse(savedState) : null;
+};
+컴포넌트 상태 관리
+const [game, setGame] = useState(null);           // 게임 상태
+const [selectedCells, setSelectedCells] = useState([]); // 선택된 셀들
+const [isLoading, setIsLoading] = useState(true); // 로딩 상태
+const [soundOn, setSoundOn] = useState(true);     // 사운드 설정
+3. 애니메이션 시스템
+CSS 애니메이션 클래스
+.shake { animation: shake 0.5s; }
+.fade-out { animation: fadeOut 0.3s; }
+.success { animation: success 0.5s; }
+.new-cell { animation: newCell 0.5s; }
+애니메이션 상태 관리
+const [shakeBoard, setShakeBoard] = useState(false);
+const [removedCells, setRemovedCells] = useState([]);
+const [successCells, setSuccessCells] = useState([]);
+const [newCells, setNewCells] = useState([]);
+4. 사운드 시스템
+Web Audio API 활용
+class SoundEffects {
+  constructor() {
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.muted = false;
+  }
+  
+  click() { /* 클릭 사운드 */ }
+  pop() { /* 팝 사운드 */ }
+  success() { /* 성공 사운드 */ }
+  error() { /* 에러 사운드 */ }
+  win() { /* 승리 사운드 */ }
+}
+🔄 데이터 플로우
+1. 게임 시작
+1. React App 마운트
+2. LocalStorage에서 저장된 상태 확인
+3. 저장된 상태가 있으면 복원, 없으면 새 게임 시작
+4. FastAPI /start 엔드포인트 호출
+5. 초기 보드 생성 및 반환
+6. 게임 상태를 LocalStorage에 저장
+2. 숫자 제거
+1. 사용자가 두 셀 선택
+2. 선택된 셀들의 유효성 검사
+3. FastAPI /remove 엔드포인트 호출
+4. 백엔드에서 매칭 규칙 검증
+5. 성공 시 보드 업데이트, 실패 시 에러 애니메이션
+6. 업데이트된 상태를 LocalStorage에 저장
+3. 숫자 추가
+1. 사용자가 "Add Numbers" 버튼 클릭
+2. FastAPI /add 엔드포인트 호출
+3. 백엔드에서 새로운 숫자들 생성
+4. 보드에 새 숫자들 추가
+5. 애니메이션 효과와 함께 UI 업데이트
+🎨 UI/UX 설계
+컴포넌트 계층 구조
+App
+├── Board
+│   └── NumberCell (여러 개)
+├── Controls
+└── HowToPlayModal
+반응형 디자인
+
+CSS Grid를 활용한 유연한 보드 레이아웃
+모바일 친화적인 터치 인터페이스
+다양한 화면 크기에 대응하는 반응형 디자인
+
+접근성 고려사항
+
+키보드 네비게이션 지원
+스크린 리더 호환성
+색상 대비 및 가독성 최적화
+
+🚀 성능 최적화
+1. 메모리 관리
+
+불필요한 리렌더링 방지를 위한 React.memo 활용
+애니메이션 상태의 적절한 정리
+LocalStorage 사용량 최적화
+
+2. 네트워크 최적화
+
+Stateless 백엔드 설계로 서버 리소스 절약
+필요한 데이터만 전송하는 효율적인 API 설계
+에러 처리 및 재시도 로직
+
+3. 사용자 경험
+
+로딩 상태 표시
+즉각적인 피드백 (애니메이션, 사운드)
+게임 상태 자동 저장
+
+🔒 보안 고려사항
+1. 입력 검증
+
+프론트엔드와 백엔드 양쪽에서 유효성 검사
+XSS 공격 방지를 위한 데이터 이스케이핑
+API 요청의 적절한 검증
+
+2. 데이터 보호
+
+민감한 정보는 서버에 저장하지 않음
+LocalStorage 사용 시 데이터 무결성 확인
+클라이언트 사이드 보안 고려사항
+
+📊 확장 가능성
+1. 기능 확장
+
+멀티플레이어 지원
+리더보드 시스템
+다양한 게임 모드
+난이도 조절
+
+2. 기술적 확장
+
+WebSocket을 통한 실시간 기능
+PWA(Progressive Web App) 지원
+오프라인 플레이 기능
+데이터베이스 연동
+
+🎯 개발 철학
+1. 단순함 (Simplicity)
+
+복잡한 상태 관리 라이브러리 대신 React 기본 기능 활용
+명확하고 이해하기 쉬운 코드 구조
+최소한의 의존성
+
+2. 사용자 중심 (User-Centric)
+
+직관적인 게임 인터페이스
+즉각적인 피드백과 애니메이션
+게임 상태의 자동 저장
+
+3. 성능 최적화 (Performance)
+
+효율적인 렌더링
+최적화된 애니메이션
+빠른 응답 시간
+
+📝 결론
+Number Game은 현대적인 웹 개발 기술을 활용하여 만든 완성도 높은 퍼즐 게임입니다. React와 FastAPI의 조합으로 성능과 개발 경험을 모두 만족시키는 아키텍처를 구축했으며, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과로 사용자에게 매력적인 게임 경험을 제공합니다.'><meta name=author content="mori"><link rel=canonical href=http://localhost:64609/posts/vibe-coding-game/game_architecture/><meta name=google-site-verification content="XYZabc"><meta name=yandex-verification content="XYZabc"><meta name=msvalidate.01 content="XYZabc"><link crossorigin=anonymous href=/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css integrity="sha256-j+ECM6cGvIfy4Is8+XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as=style><link rel=icon href=http://localhost:64609/static/favicons/favicon.ico><link rel=icon type=image/png sizes=16x16 href=http://localhost:64609/static/favicons/favicon-16x16.ico><link rel=icon type=image/png sizes=32x32 href=http://localhost:64609/static/favicons/favicon-32x32.ico><link rel=apple-touch-icon href=http://localhost:64609/%3Clink%20/%20abs%20url%3E><link rel=mask-icon href=http://localhost:64609/%3Clink%20/%20abs%20url%3E><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=http://localhost:64609/posts/vibe-coding-game/game_architecture/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js onload='renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}]})'></script><meta property="og:url" content="http://localhost:64609/posts/vibe-coding-game/game_architecture/"><meta property="og:site_name" content="mori-blog"><meta property="og:title" content="mori-blog"><meta property="og:description" content='Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석 🎮 프로젝트 개요 Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.
+🏗️ 전체 아키텍처 ┌─────────────────┐ HTTP API ┌─────────────────┐ │ React Frontend │ ◄────────────► │ FastAPI Backend │ │ │ │ │ │ • Game UI │ │ • Game Logic │ │ • State Mgmt │ │ • Board Creation │ │ • Animations │ │ • Validation │ │ • LocalStorage │ │ • Stateless │ └─────────────────┘ └─────────────────┘ 📁 프로젝트 구조 number_game/ ├── frontend/ # React 애플리케이션 │ ├── src/ │ │ ├── App.jsx # 메인 컴포넌트 │ │ ├── components/ # UI 컴포넌트들 │ │ │ ├── Board.jsx # 게임 보드 │ │ │ ├── NumberCell.jsx # 개별 숫자 셀 │ │ │ └── Controls.jsx # 게임 컨트롤 │ │ ├── api/ │ │ │ └── gameApi.js # API 통신 │ │ └── utils/ │ │ └── soundEffects.js # 사운드 효과 │ └── package.json ├── backend/ # FastAPI 서버 │ ├── app/ │ │ ├── main.py # API 엔드포인트 │ │ ├── game_logic.py # 게임 규칙 로직 │ │ └── models.py # 데이터 모델 │ └── requirements.txt └── README.md 🎯 핵심 기술 스택 Frontend React 18.2.0: 컴포넌트 기반 UI CSS: 스타일링 및 애니메이션 LocalStorage: 게임 상태 영속성 Backend FastAPI: 고성능 Python 웹 프레임워크 Pydantic: 데이터 검증 및 직렬화 Uvicorn: ASGI 서버 🔧 핵심 기능 분석 1. 게임 로직 (Backend) 보드 생성 알고리즘 def create_initial_board() -> List[List[Optional[int]]]: # 1-9까지 각 숫자를 최소 2번씩 보장 numbers = [i for i in range(1, 10)] * 2 # 나머지 17개 숫자를 랜덤으로 추가 remaining_numbers = [random.randint(1, 9) for _ in range(17)] numbers.extend(remaining_numbers) # 3행 9열 + 1행 8열 구조로 배치 board = [] for i in range(3): board.append(numbers[i*9:(i+1)*9]) board.append(numbers[27:35]) return board 매칭 검증 로직 def can_remove(board, pos1, pos2) -> bool: # 1. 같은 숫자이거나 합이 10인지 확인 if num1 != num2 and num1 + num2 != 10: return False # 2. 인접하거나 경로가 막히지 않았는지 확인 return is_adjacent_or_clear_path(board, pos1, pos2) 2. 상태 관리 (Frontend) LocalStorage 기반 영속성 const saveGameState = (gameState) => { localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(gameState)); }; const loadGameState = () => { const savedState = localStorage.getItem(GAME_STORAGE_KEY); return savedState ? JSON.parse(savedState) : null; }; 컴포넌트 상태 관리 const [game, setGame] = useState(null); // 게임 상태 const [selectedCells, setSelectedCells] = useState([]); // 선택된 셀들 const [isLoading, setIsLoading] = useState(true); // 로딩 상태 const [soundOn, setSoundOn] = useState(true); // 사운드 설정 3. 애니메이션 시스템 CSS 애니메이션 클래스 .shake { animation: shake 0.5s; } .fade-out { animation: fadeOut 0.3s; } .success { animation: success 0.5s; } .new-cell { animation: newCell 0.5s; } 애니메이션 상태 관리 const [shakeBoard, setShakeBoard] = useState(false); const [removedCells, setRemovedCells] = useState([]); const [successCells, setSuccessCells] = useState([]); const [newCells, setNewCells] = useState([]); 4. 사운드 시스템 Web Audio API 활용 class SoundEffects { constructor() { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); this.muted = false; } click() { /* 클릭 사운드 */ } pop() { /* 팝 사운드 */ } success() { /* 성공 사운드 */ } error() { /* 에러 사운드 */ } win() { /* 승리 사운드 */ } } 🔄 데이터 플로우 1. 게임 시작 1. React App 마운트 2. LocalStorage에서 저장된 상태 확인 3. 저장된 상태가 있으면 복원, 없으면 새 게임 시작 4. FastAPI /start 엔드포인트 호출 5. 초기 보드 생성 및 반환 6. 게임 상태를 LocalStorage에 저장 2. 숫자 제거 1. 사용자가 두 셀 선택 2. 선택된 셀들의 유효성 검사 3. FastAPI /remove 엔드포인트 호출 4. 백엔드에서 매칭 규칙 검증 5. 성공 시 보드 업데이트, 실패 시 에러 애니메이션 6. 업데이트된 상태를 LocalStorage에 저장 3. 숫자 추가 1. 사용자가 "Add Numbers" 버튼 클릭 2. FastAPI /add 엔드포인트 호출 3. 백엔드에서 새로운 숫자들 생성 4. 보드에 새 숫자들 추가 5. 애니메이션 효과와 함께 UI 업데이트 🎨 UI/UX 설계 컴포넌트 계층 구조 App ├── Board │ └── NumberCell (여러 개) ├── Controls └── HowToPlayModal 반응형 디자인 CSS Grid를 활용한 유연한 보드 레이아웃 모바일 친화적인 터치 인터페이스 다양한 화면 크기에 대응하는 반응형 디자인 접근성 고려사항 키보드 네비게이션 지원 스크린 리더 호환성 색상 대비 및 가독성 최적화 🚀 성능 최적화 1. 메모리 관리 불필요한 리렌더링 방지를 위한 React.memo 활용 애니메이션 상태의 적절한 정리 LocalStorage 사용량 최적화 2. 네트워크 최적화 Stateless 백엔드 설계로 서버 리소스 절약 필요한 데이터만 전송하는 효율적인 API 설계 에러 처리 및 재시도 로직 3. 사용자 경험 로딩 상태 표시 즉각적인 피드백 (애니메이션, 사운드) 게임 상태 자동 저장 🔒 보안 고려사항 1. 입력 검증 프론트엔드와 백엔드 양쪽에서 유효성 검사 XSS 공격 방지를 위한 데이터 이스케이핑 API 요청의 적절한 검증 2. 데이터 보호 민감한 정보는 서버에 저장하지 않음 LocalStorage 사용 시 데이터 무결성 확인 클라이언트 사이드 보안 고려사항 📊 확장 가능성 1. 기능 확장 멀티플레이어 지원 리더보드 시스템 다양한 게임 모드 난이도 조절 2. 기술적 확장 WebSocket을 통한 실시간 기능 PWA(Progressive Web App) 지원 오프라인 플레이 기능 데이터베이스 연동 🎯 개발 철학 1. 단순함 (Simplicity) 복잡한 상태 관리 라이브러리 대신 React 기본 기능 활용 명확하고 이해하기 쉬운 코드 구조 최소한의 의존성 2. 사용자 중심 (User-Centric) 직관적인 게임 인터페이스 즉각적인 피드백과 애니메이션 게임 상태의 자동 저장 3. 성능 최적화 (Performance) 효율적인 렌더링 최적화된 애니메이션 빠른 응답 시간 📝 결론 Number Game은 현대적인 웹 개발 기술을 활용하여 만든 완성도 높은 퍼즐 게임입니다. React와 FastAPI의 조합으로 성능과 개발 경험을 모두 만족시키는 아키텍처를 구축했으며, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과로 사용자에게 매력적인 게임 경험을 제공합니다.'><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="og:image" content="http://localhost:64609/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="http://localhost:64609/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:title content><meta name=twitter:description content='Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석
+🎮 프로젝트 개요
+Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.
+🏗️ 전체 아키텍처
+┌─────────────────┐    HTTP API    ┌─────────────────┐
+│   React Frontend │ ◄────────────► │  FastAPI Backend │
+│                 │                │                 │
+│ • Game UI       │                │ • Game Logic    │
+│ • State Mgmt    │                │ • Board Creation │
+│ • Animations    │                │ • Validation    │
+│ • LocalStorage  │                │ • Stateless     │
+└─────────────────┘                └─────────────────┘
+📁 프로젝트 구조
+number_game/
+├── frontend/                 # React 애플리케이션
+│   ├── src/
+│   │   ├── App.jsx          # 메인 컴포넌트
+│   │   ├── components/      # UI 컴포넌트들
+│   │   │   ├── Board.jsx    # 게임 보드
+│   │   │   ├── NumberCell.jsx # 개별 숫자 셀
+│   │   │   └── Controls.jsx # 게임 컨트롤
+│   │   ├── api/
+│   │   │   └── gameApi.js   # API 통신
+│   │   └── utils/
+│   │       └── soundEffects.js # 사운드 효과
+│   └── package.json
+├── backend/                  # FastAPI 서버
+│   ├── app/
+│   │   ├── main.py          # API 엔드포인트
+│   │   ├── game_logic.py    # 게임 규칙 로직
+│   │   └── models.py        # 데이터 모델
+│   └── requirements.txt
+└── README.md
+🎯 핵심 기술 스택
+Frontend
+
+React 18.2.0: 컴포넌트 기반 UI
+CSS: 스타일링 및 애니메이션
+LocalStorage: 게임 상태 영속성
+
+Backend
+
+FastAPI: 고성능 Python 웹 프레임워크
+Pydantic: 데이터 검증 및 직렬화
+Uvicorn: ASGI 서버
+
+🔧 핵심 기능 분석
+1. 게임 로직 (Backend)
+보드 생성 알고리즘
+def create_initial_board() -> List[List[Optional[int]]]:
+    # 1-9까지 각 숫자를 최소 2번씩 보장
+    numbers = [i for i in range(1, 10)] * 2
+    
+    # 나머지 17개 숫자를 랜덤으로 추가
+    remaining_numbers = [random.randint(1, 9) for _ in range(17)]
+    numbers.extend(remaining_numbers)
+    
+    # 3행 9열 + 1행 8열 구조로 배치
+    board = []
+    for i in range(3):
+        board.append(numbers[i*9:(i+1)*9])
+    board.append(numbers[27:35])
+    return board
+매칭 검증 로직
+def can_remove(board, pos1, pos2) -> bool:
+    # 1. 같은 숫자이거나 합이 10인지 확인
+    if num1 != num2 and num1 + num2 != 10:
+        return False
+    
+    # 2. 인접하거나 경로가 막히지 않았는지 확인
+    return is_adjacent_or_clear_path(board, pos1, pos2)
+2. 상태 관리 (Frontend)
+LocalStorage 기반 영속성
+const saveGameState = (gameState) => {
+  localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(gameState));
+};
+
+const loadGameState = () => {
+  const savedState = localStorage.getItem(GAME_STORAGE_KEY);
+  return savedState ? JSON.parse(savedState) : null;
+};
+컴포넌트 상태 관리
+const [game, setGame] = useState(null);           // 게임 상태
+const [selectedCells, setSelectedCells] = useState([]); // 선택된 셀들
+const [isLoading, setIsLoading] = useState(true); // 로딩 상태
+const [soundOn, setSoundOn] = useState(true);     // 사운드 설정
+3. 애니메이션 시스템
+CSS 애니메이션 클래스
+.shake { animation: shake 0.5s; }
+.fade-out { animation: fadeOut 0.3s; }
+.success { animation: success 0.5s; }
+.new-cell { animation: newCell 0.5s; }
+애니메이션 상태 관리
+const [shakeBoard, setShakeBoard] = useState(false);
+const [removedCells, setRemovedCells] = useState([]);
+const [successCells, setSuccessCells] = useState([]);
+const [newCells, setNewCells] = useState([]);
+4. 사운드 시스템
+Web Audio API 활용
+class SoundEffects {
+  constructor() {
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.muted = false;
+  }
+  
+  click() { /* 클릭 사운드 */ }
+  pop() { /* 팝 사운드 */ }
+  success() { /* 성공 사운드 */ }
+  error() { /* 에러 사운드 */ }
+  win() { /* 승리 사운드 */ }
+}
+🔄 데이터 플로우
+1. 게임 시작
+1. React App 마운트
+2. LocalStorage에서 저장된 상태 확인
+3. 저장된 상태가 있으면 복원, 없으면 새 게임 시작
+4. FastAPI /start 엔드포인트 호출
+5. 초기 보드 생성 및 반환
+6. 게임 상태를 LocalStorage에 저장
+2. 숫자 제거
+1. 사용자가 두 셀 선택
+2. 선택된 셀들의 유효성 검사
+3. FastAPI /remove 엔드포인트 호출
+4. 백엔드에서 매칭 규칙 검증
+5. 성공 시 보드 업데이트, 실패 시 에러 애니메이션
+6. 업데이트된 상태를 LocalStorage에 저장
+3. 숫자 추가
+1. 사용자가 "Add Numbers" 버튼 클릭
+2. FastAPI /add 엔드포인트 호출
+3. 백엔드에서 새로운 숫자들 생성
+4. 보드에 새 숫자들 추가
+5. 애니메이션 효과와 함께 UI 업데이트
+🎨 UI/UX 설계
+컴포넌트 계층 구조
+App
+├── Board
+│   └── NumberCell (여러 개)
+├── Controls
+└── HowToPlayModal
+반응형 디자인
+
+CSS Grid를 활용한 유연한 보드 레이아웃
+모바일 친화적인 터치 인터페이스
+다양한 화면 크기에 대응하는 반응형 디자인
+
+접근성 고려사항
+
+키보드 네비게이션 지원
+스크린 리더 호환성
+색상 대비 및 가독성 최적화
+
+🚀 성능 최적화
+1. 메모리 관리
+
+불필요한 리렌더링 방지를 위한 React.memo 활용
+애니메이션 상태의 적절한 정리
+LocalStorage 사용량 최적화
+
+2. 네트워크 최적화
+
+Stateless 백엔드 설계로 서버 리소스 절약
+필요한 데이터만 전송하는 효율적인 API 설계
+에러 처리 및 재시도 로직
+
+3. 사용자 경험
+
+로딩 상태 표시
+즉각적인 피드백 (애니메이션, 사운드)
+게임 상태 자동 저장
+
+🔒 보안 고려사항
+1. 입력 검증
+
+프론트엔드와 백엔드 양쪽에서 유효성 검사
+XSS 공격 방지를 위한 데이터 이스케이핑
+API 요청의 적절한 검증
+
+2. 데이터 보호
+
+민감한 정보는 서버에 저장하지 않음
+LocalStorage 사용 시 데이터 무결성 확인
+클라이언트 사이드 보안 고려사항
+
+📊 확장 가능성
+1. 기능 확장
+
+멀티플레이어 지원
+리더보드 시스템
+다양한 게임 모드
+난이도 조절
+
+2. 기술적 확장
+
+WebSocket을 통한 실시간 기능
+PWA(Progressive Web App) 지원
+오프라인 플레이 기능
+데이터베이스 연동
+
+🎯 개발 철학
+1. 단순함 (Simplicity)
+
+복잡한 상태 관리 라이브러리 대신 React 기본 기능 활용
+명확하고 이해하기 쉬운 코드 구조
+최소한의 의존성
+
+2. 사용자 중심 (User-Centric)
+
+직관적인 게임 인터페이스
+즉각적인 피드백과 애니메이션
+게임 상태의 자동 저장
+
+3. 성능 최적화 (Performance)
+
+효율적인 렌더링
+최적화된 애니메이션
+빠른 응답 시간
+
+📝 결론
+Number Game은 현대적인 웹 개발 기술을 활용하여 만든 완성도 높은 퍼즐 게임입니다. React와 FastAPI의 조합으로 성능과 개발 경험을 모두 만족시키는 아키텍처를 구축했으며, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과로 사용자에게 매력적인 게임 경험을 제공합니다.'><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"http://localhost:64609/posts/"},{"@type":"ListItem","position":2,"name":"","item":"http://localhost:64609/posts/vibe-coding-game/game_architecture/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"","name":"","description":"Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석 🎮 프로젝트 개요 Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.\n🏗️ 전체 아키텍처 ┌─────────────────┐ HTTP API ┌─────────────────┐ │ React Frontend │ ◄────────────► │ FastAPI Backend │ │ │ │ │ │ • Game UI │ │ • Game Logic │ │ • State Mgmt │ │ • Board Creation │ │ • Animations │ │ • Validation │ │ • LocalStorage │ │ • Stateless │ └─────────────────┘ └─────────────────┘ 📁 프로젝트 구조 number_game/ ├── frontend/ # React 애플리케이션 │ ├── src/ │ │ ├── App.jsx # 메인 컴포넌트 │ │ ├── components/ # UI 컴포넌트들 │ │ │ ├── Board.jsx # 게임 보드 │ │ │ ├── NumberCell.jsx # 개별 숫자 셀 │ │ │ └── Controls.jsx # 게임 컨트롤 │ │ ├── api/ │ │ │ └── gameApi.js # API 통신 │ │ └── utils/ │ │ └── soundEffects.js # 사운드 효과 │ └── package.json ├── backend/ # FastAPI 서버 │ ├── app/ │ │ ├── main.py # API 엔드포인트 │ │ ├── game_logic.py # 게임 규칙 로직 │ │ └── models.py # 데이터 모델 │ └── requirements.txt └── README.md 🎯 핵심 기술 스택 Frontend React 18.2.0: 컴포넌트 기반 UI CSS: 스타일링 및 애니메이션 LocalStorage: 게임 상태 영속성 Backend FastAPI: 고성능 Python 웹 프레임워크 Pydantic: 데이터 검증 및 직렬화 Uvicorn: ASGI 서버 🔧 핵심 기능 분석 1. 게임 로직 (Backend) 보드 생성 알고리즘 def create_initial_board() -\u0026gt; List[List[Optional[int]]]: # 1-9까지 각 숫자를 최소 2번씩 보장 numbers = [i for i in range(1, 10)] * 2 # 나머지 17개 숫자를 랜덤으로 추가 remaining_numbers = [random.randint(1, 9) for _ in range(17)] numbers.extend(remaining_numbers) # 3행 9열 + 1행 8열 구조로 배치 board = [] for i in range(3): board.append(numbers[i*9:(i+1)*9]) board.append(numbers[27:35]) return board 매칭 검증 로직 def can_remove(board, pos1, pos2) -\u0026gt; bool: # 1. 같은 숫자이거나 합이 10인지 확인 if num1 != num2 and num1 + num2 != 10: return False # 2. 인접하거나 경로가 막히지 않았는지 확인 return is_adjacent_or_clear_path(board, pos1, pos2) 2. 상태 관리 (Frontend) LocalStorage 기반 영속성 const saveGameState = (gameState) =\u0026gt; { localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(gameState)); }; const loadGameState = () =\u0026gt; { const savedState = localStorage.getItem(GAME_STORAGE_KEY); return savedState ? JSON.parse(savedState) : null; }; 컴포넌트 상태 관리 const [game, setGame] = useState(null); // 게임 상태 const [selectedCells, setSelectedCells] = useState([]); // 선택된 셀들 const [isLoading, setIsLoading] = useState(true); // 로딩 상태 const [soundOn, setSoundOn] = useState(true); // 사운드 설정 3. 애니메이션 시스템 CSS 애니메이션 클래스 .shake { animation: shake 0.5s; } .fade-out { animation: fadeOut 0.3s; } .success { animation: success 0.5s; } .new-cell { animation: newCell 0.5s; } 애니메이션 상태 관리 const [shakeBoard, setShakeBoard] = useState(false); const [removedCells, setRemovedCells] = useState([]); const [successCells, setSuccessCells] = useState([]); const [newCells, setNewCells] = useState([]); 4. 사운드 시스템 Web Audio API 활용 class SoundEffects { constructor() { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); this.muted = false; } click() { /* 클릭 사운드 */ } pop() { /* 팝 사운드 */ } success() { /* 성공 사운드 */ } error() { /* 에러 사운드 */ } win() { /* 승리 사운드 */ } } 🔄 데이터 플로우 1. 게임 시작 1. React App 마운트 2. LocalStorage에서 저장된 상태 확인 3. 저장된 상태가 있으면 복원, 없으면 새 게임 시작 4. FastAPI /start 엔드포인트 호출 5. 초기 보드 생성 및 반환 6. 게임 상태를 LocalStorage에 저장 2. 숫자 제거 1. 사용자가 두 셀 선택 2. 선택된 셀들의 유효성 검사 3. FastAPI /remove 엔드포인트 호출 4. 백엔드에서 매칭 규칙 검증 5. 성공 시 보드 업데이트, 실패 시 에러 애니메이션 6. 업데이트된 상태를 LocalStorage에 저장 3. 숫자 추가 1. 사용자가 \u0026#34;Add Numbers\u0026#34; 버튼 클릭 2. FastAPI /add 엔드포인트 호출 3. 백엔드에서 새로운 숫자들 생성 4. 보드에 새 숫자들 추가 5. 애니메이션 효과와 함께 UI 업데이트 🎨 UI/UX 설계 컴포넌트 계층 구조 App ├── Board │ └── NumberCell (여러 개) ├── Controls └── HowToPlayModal 반응형 디자인 CSS Grid를 활용한 유연한 보드 레이아웃 모바일 친화적인 터치 인터페이스 다양한 화면 크기에 대응하는 반응형 디자인 접근성 고려사항 키보드 네비게이션 지원 스크린 리더 호환성 색상 대비 및 가독성 최적화 🚀 성능 최적화 1. 메모리 관리 불필요한 리렌더링 방지를 위한 React.memo 활용 애니메이션 상태의 적절한 정리 LocalStorage 사용량 최적화 2. 네트워크 최적화 Stateless 백엔드 설계로 서버 리소스 절약 필요한 데이터만 전송하는 효율적인 API 설계 에러 처리 및 재시도 로직 3. 사용자 경험 로딩 상태 표시 즉각적인 피드백 (애니메이션, 사운드) 게임 상태 자동 저장 🔒 보안 고려사항 1. 입력 검증 프론트엔드와 백엔드 양쪽에서 유효성 검사 XSS 공격 방지를 위한 데이터 이스케이핑 API 요청의 적절한 검증 2. 데이터 보호 민감한 정보는 서버에 저장하지 않음 LocalStorage 사용 시 데이터 무결성 확인 클라이언트 사이드 보안 고려사항 📊 확장 가능성 1. 기능 확장 멀티플레이어 지원 리더보드 시스템 다양한 게임 모드 난이도 조절 2. 기술적 확장 WebSocket을 통한 실시간 기능 PWA(Progressive Web App) 지원 오프라인 플레이 기능 데이터베이스 연동 🎯 개발 철학 1. 단순함 (Simplicity) 복잡한 상태 관리 라이브러리 대신 React 기본 기능 활용 명확하고 이해하기 쉬운 코드 구조 최소한의 의존성 2. 사용자 중심 (User-Centric) 직관적인 게임 인터페이스 즉각적인 피드백과 애니메이션 게임 상태의 자동 저장 3. 성능 최적화 (Performance) 효율적인 렌더링 최적화된 애니메이션 빠른 응답 시간 📝 결론 Number Game은 현대적인 웹 개발 기술을 활용하여 만든 완성도 높은 퍼즐 게임입니다. React와 FastAPI의 조합으로 성능과 개발 경험을 모두 만족시키는 아키텍처를 구축했으며, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과로 사용자에게 매력적인 게임 경험을 제공합니다.\n","keywords":[],"articleBody":"Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석 🎮 프로젝트 개요 Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.\n🏗️ 전체 아키텍처 ┌─────────────────┐ HTTP API ┌─────────────────┐ │ React Frontend │ ◄────────────► │ FastAPI Backend │ │ │ │ │ │ • Game UI │ │ • Game Logic │ │ • State Mgmt │ │ • Board Creation │ │ • Animations │ │ • Validation │ │ • LocalStorage │ │ • Stateless │ └─────────────────┘ └─────────────────┘ 📁 프로젝트 구조 number_game/ ├── frontend/ # React 애플리케이션 │ ├── src/ │ │ ├── App.jsx # 메인 컴포넌트 │ │ ├── components/ # UI 컴포넌트들 │ │ │ ├── Board.jsx # 게임 보드 │ │ │ ├── NumberCell.jsx # 개별 숫자 셀 │ │ │ └── Controls.jsx # 게임 컨트롤 │ │ ├── api/ │ │ │ └── gameApi.js # API 통신 │ │ └── utils/ │ │ └── soundEffects.js # 사운드 효과 │ └── package.json ├── backend/ # FastAPI 서버 │ ├── app/ │ │ ├── main.py # API 엔드포인트 │ │ ├── game_logic.py # 게임 규칙 로직 │ │ └── models.py # 데이터 모델 │ └── requirements.txt └── README.md 🎯 핵심 기술 스택 Frontend React 18.2.0: 컴포넌트 기반 UI CSS: 스타일링 및 애니메이션 LocalStorage: 게임 상태 영속성 Backend FastAPI: 고성능 Python 웹 프레임워크 Pydantic: 데이터 검증 및 직렬화 Uvicorn: ASGI 서버 🔧 핵심 기능 분석 1. 게임 로직 (Backend) 보드 생성 알고리즘 def create_initial_board() -\u003e List[List[Optional[int]]]: # 1-9까지 각 숫자를 최소 2번씩 보장 numbers = [i for i in range(1, 10)] * 2 # 나머지 17개 숫자를 랜덤으로 추가 remaining_numbers = [random.randint(1, 9) for _ in range(17)] numbers.extend(remaining_numbers) # 3행 9열 + 1행 8열 구조로 배치 board = [] for i in range(3): board.append(numbers[i*9:(i+1)*9]) board.append(numbers[27:35]) return board 매칭 검증 로직 def can_remove(board, pos1, pos2) -\u003e bool: # 1. 같은 숫자이거나 합이 10인지 확인 if num1 != num2 and num1 + num2 != 10: return False # 2. 인접하거나 경로가 막히지 않았는지 확인 return is_adjacent_or_clear_path(board, pos1, pos2) 2. 상태 관리 (Frontend) LocalStorage 기반 영속성 const saveGameState = (gameState) =\u003e { localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(gameState)); }; const loadGameState = () =\u003e { const savedState = localStorage.getItem(GAME_STORAGE_KEY); return savedState ? JSON.parse(savedState) : null; }; 컴포넌트 상태 관리 const [game, setGame] = useState(null); // 게임 상태 const [selectedCells, setSelectedCells] = useState([]); // 선택된 셀들 const [isLoading, setIsLoading] = useState(true); // 로딩 상태 const [soundOn, setSoundOn] = useState(true); // 사운드 설정 3. 애니메이션 시스템 CSS 애니메이션 클래스 .shake { animation: shake 0.5s; } .fade-out { animation: fadeOut 0.3s; } .success { animation: success 0.5s; } .new-cell { animation: newCell 0.5s; } 애니메이션 상태 관리 const [shakeBoard, setShakeBoard] = useState(false); const [removedCells, setRemovedCells] = useState([]); const [successCells, setSuccessCells] = useState([]); const [newCells, setNewCells] = useState([]); 4. 사운드 시스템 Web Audio API 활용 class SoundEffects { constructor() { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); this.muted = false; } click() { /* 클릭 사운드 */ } pop() { /* 팝 사운드 */ } success() { /* 성공 사운드 */ } error() { /* 에러 사운드 */ } win() { /* 승리 사운드 */ } } 🔄 데이터 플로우 1. 게임 시작 1. React App 마운트 2. LocalStorage에서 저장된 상태 확인 3. 저장된 상태가 있으면 복원, 없으면 새 게임 시작 4. FastAPI /start 엔드포인트 호출 5. 초기 보드 생성 및 반환 6. 게임 상태를 LocalStorage에 저장 2. 숫자 제거 1. 사용자가 두 셀 선택 2. 선택된 셀들의 유효성 검사 3. FastAPI /remove 엔드포인트 호출 4. 백엔드에서 매칭 규칙 검증 5. 성공 시 보드 업데이트, 실패 시 에러 애니메이션 6. 업데이트된 상태를 LocalStorage에 저장 3. 숫자 추가 1. 사용자가 \"Add Numbers\" 버튼 클릭 2. FastAPI /add 엔드포인트 호출 3. 백엔드에서 새로운 숫자들 생성 4. 보드에 새 숫자들 추가 5. 애니메이션 효과와 함께 UI 업데이트 🎨 UI/UX 설계 컴포넌트 계층 구조 App ├── Board │ └── NumberCell (여러 개) ├── Controls └── HowToPlayModal 반응형 디자인 CSS Grid를 활용한 유연한 보드 레이아웃 모바일 친화적인 터치 인터페이스 다양한 화면 크기에 대응하는 반응형 디자인 접근성 고려사항 키보드 네비게이션 지원 스크린 리더 호환성 색상 대비 및 가독성 최적화 🚀 성능 최적화 1. 메모리 관리 불필요한 리렌더링 방지를 위한 React.memo 활용 애니메이션 상태의 적절한 정리 LocalStorage 사용량 최적화 2. 네트워크 최적화 Stateless 백엔드 설계로 서버 리소스 절약 필요한 데이터만 전송하는 효율적인 API 설계 에러 처리 및 재시도 로직 3. 사용자 경험 로딩 상태 표시 즉각적인 피드백 (애니메이션, 사운드) 게임 상태 자동 저장 🔒 보안 고려사항 1. 입력 검증 프론트엔드와 백엔드 양쪽에서 유효성 검사 XSS 공격 방지를 위한 데이터 이스케이핑 API 요청의 적절한 검증 2. 데이터 보호 민감한 정보는 서버에 저장하지 않음 LocalStorage 사용 시 데이터 무결성 확인 클라이언트 사이드 보안 고려사항 📊 확장 가능성 1. 기능 확장 멀티플레이어 지원 리더보드 시스템 다양한 게임 모드 난이도 조절 2. 기술적 확장 WebSocket을 통한 실시간 기능 PWA(Progressive Web App) 지원 오프라인 플레이 기능 데이터베이스 연동 🎯 개발 철학 1. 단순함 (Simplicity) 복잡한 상태 관리 라이브러리 대신 React 기본 기능 활용 명확하고 이해하기 쉬운 코드 구조 최소한의 의존성 2. 사용자 중심 (User-Centric) 직관적인 게임 인터페이스 즉각적인 피드백과 애니메이션 게임 상태의 자동 저장 3. 성능 최적화 (Performance) 효율적인 렌더링 최적화된 애니메이션 빠른 응답 시간 📝 결론 Number Game은 현대적인 웹 개발 기술을 활용하여 만든 완성도 높은 퍼즐 게임입니다. React와 FastAPI의 조합으로 성능과 개발 경험을 모두 만족시키는 아키텍처를 구축했으며, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과로 사용자에게 매력적인 게임 경험을 제공합니다.\n이 프로젝트는 작은 규모이지만 확장 가능한 구조를 가지고 있어, 향후 다양한 기능 추가나 개선이 용이한 설계를 보여줍니다.\n이 글은 Number Game 프로젝트의 기술적 구조와 설계 철학을 분석한 내용입니다. 실제 코드와 더 자세한 구현 세부사항은 프로젝트 저장소를 참조하시기 바랍니다.\n","wordCount":"926","inLanguage":"en","image":"http://localhost:64609/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished":"0001-01-01T00:00:00Z","dateModified":"0001-01-01T00:00:00Z","author":{"@type":"Person","name":"mori"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:64609/posts/vibe-coding-game/game_architecture/"},"publisher":{"@type":"Organization","name":"mori-blog","logo":{"@type":"ImageObject","url":"http://localhost:64609/static/favicons/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=http://localhost:64609/ accesskey=h title="Mori's blog (Alt + H)"><img src=http://localhost:64609/apple-touch-icon.png alt aria-label=logo height=35>Mori's blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=http://localhost:64609/posts/ title=posts><span>posts</span></a></li><li><a href=http://localhost:64609/tags/ title=tags><span>tags</span></a></li><li><a href=http://localhost:64609/search/ title="search (Alt + /)" accesskey=/><span>search</span></a></li></ul></nav></header><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/katex.min.css integrity=sha384-t5CR+zwDAROtph0PXGte6ia8heboACF9R5l/DiY+WZ3P2lxNgvJkQk5n7GPvLMYw crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/katex.min.js integrity=sha384-FaFLTlohFghEIZkw6VGwmf9ISTubWAVYW8tG8+w2LAIftJEULZABrF9PPFv+tVkH crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.13.0/dist/contrib/auto-render.min.js integrity=sha384-bHBqxz8fokvgoJ/sc17HODNxa42TlaEhB+w8ZJXTc2nZf1VgEaFZeZvT4Mznfz0v crossorigin=anonymous onload=renderMathInElement(document.body)></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],throwOnError:!1})})</script><script type=module>
+    import renderMathInElement from "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.mjs";
+    renderMathInElement(document.body);
+</script><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent"></h1><div class=post-meta>5 min&nbsp;·&nbsp;926 words&nbsp;·&nbsp;mori&nbsp;|&nbsp;<a href=https://github.com/moripiri/moripiri.github.io/issues rel="noopener noreferrer edit" target=_blank>Suggest Changes</a></div></header><div class=toc><details open><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#-프로젝트-개요>🎮 프로젝트 개요</a></li><li><a href=#-전체-아키텍처>🏗️ 전체 아키텍처</a></li><li><a href=#-프로젝트-구조>📁 프로젝트 구조</a></li><li><a href=#-핵심-기술-스택>🎯 핵심 기술 스택</a><ul><li><a href=#frontend>Frontend</a></li><li><a href=#backend>Backend</a></li></ul></li><li><a href=#-핵심-기능-분석>🔧 핵심 기능 분석</a><ul><li><a href=#1-게임-로직-backend>1. 게임 로직 (Backend)</a></li><li><a href=#2-상태-관리-frontend>2. 상태 관리 (Frontend)</a></li><li><a href=#3-애니메이션-시스템>3. 애니메이션 시스템</a></li><li><a href=#4-사운드-시스템>4. 사운드 시스템</a></li></ul></li><li><a href=#-데이터-플로우>🔄 데이터 플로우</a><ul><li><a href=#1-게임-시작>1. 게임 시작</a></li><li><a href=#2-숫자-제거>2. 숫자 제거</a></li><li><a href=#3-숫자-추가>3. 숫자 추가</a></li></ul></li><li><a href=#-uiux-설계>🎨 UI/UX 설계</a><ul><li><a href=#컴포넌트-계층-구조>컴포넌트 계층 구조</a></li><li><a href=#반응형-디자인>반응형 디자인</a></li><li><a href=#접근성-고려사항>접근성 고려사항</a></li></ul></li><li><a href=#-성능-최적화>🚀 성능 최적화</a><ul><li><a href=#1-메모리-관리>1. 메모리 관리</a></li><li><a href=#2-네트워크-최적화>2. 네트워크 최적화</a></li><li><a href=#3-사용자-경험>3. 사용자 경험</a></li></ul></li><li><a href=#-보안-고려사항>🔒 보안 고려사항</a><ul><li><a href=#1-입력-검증>1. 입력 검증</a></li><li><a href=#2-데이터-보호>2. 데이터 보호</a></li></ul></li><li><a href=#-확장-가능성>📊 확장 가능성</a><ul><li><a href=#1-기능-확장>1. 기능 확장</a></li><li><a href=#2-기술적-확장>2. 기술적 확장</a></li></ul></li><li><a href=#-개발-철학>🎯 개발 철학</a><ul><li><a href=#1-단순함-simplicity>1. 단순함 (Simplicity)</a></li><li><a href=#2-사용자-중심-user-centric>2. 사용자 중심 (User-Centric)</a></li><li><a href=#3-성능-최적화-performance>3. 성능 최적화 (Performance)</a></li></ul></li><li><a href=#-결론>📝 결론</a></li></ul></nav></div></details></div><div class=post-content><h1 id=number-game-react--fastapi로-만든-퍼즐-게임-아키텍처-분석>Number Game: React + FastAPI로 만든 퍼즐 게임 아키텍처 분석<a hidden class=anchor aria-hidden=true href=#number-game-react--fastapi로-만든-퍼즐-게임-아키텍처-분석>#</a></h1><h2 id=-프로젝트-개요>🎮 프로젝트 개요<a hidden class=anchor aria-hidden=true href=#-프로젝트-개요>#</a></h2><p>Number Game은 합이 10이 되는 숫자들을 매칭하여 제거하는 퍼즐 게임입니다. React 프론트엔드와 FastAPI 백엔드로 구성된 풀스택 웹 애플리케이션으로, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과를 특징으로 합니다.</p><h2 id=-전체-아키텍처>🏗️ 전체 아키텍처<a hidden class=anchor aria-hidden=true href=#-전체-아키텍처>#</a></h2><pre tabindex=0><code>┌─────────────────┐    HTTP API    ┌─────────────────┐
+│   React Frontend │ ◄────────────► │  FastAPI Backend │
+│                 │                │                 │
+│ • Game UI       │                │ • Game Logic    │
+│ • State Mgmt    │                │ • Board Creation │
+│ • Animations    │                │ • Validation    │
+│ • LocalStorage  │                │ • Stateless     │
+└─────────────────┘                └─────────────────┘
+</code></pre><h2 id=-프로젝트-구조>📁 프로젝트 구조<a hidden class=anchor aria-hidden=true href=#-프로젝트-구조>#</a></h2><pre tabindex=0><code>number_game/
+├── frontend/                 # React 애플리케이션
+│   ├── src/
+│   │   ├── App.jsx          # 메인 컴포넌트
+│   │   ├── components/      # UI 컴포넌트들
+│   │   │   ├── Board.jsx    # 게임 보드
+│   │   │   ├── NumberCell.jsx # 개별 숫자 셀
+│   │   │   └── Controls.jsx # 게임 컨트롤
+│   │   ├── api/
+│   │   │   └── gameApi.js   # API 통신
+│   │   └── utils/
+│   │       └── soundEffects.js # 사운드 효과
+│   └── package.json
+├── backend/                  # FastAPI 서버
+│   ├── app/
+│   │   ├── main.py          # API 엔드포인트
+│   │   ├── game_logic.py    # 게임 규칙 로직
+│   │   └── models.py        # 데이터 모델
+│   └── requirements.txt
+└── README.md
+</code></pre><h2 id=-핵심-기술-스택>🎯 핵심 기술 스택<a hidden class=anchor aria-hidden=true href=#-핵심-기술-스택>#</a></h2><h3 id=frontend>Frontend<a hidden class=anchor aria-hidden=true href=#frontend>#</a></h3><ul><li><strong>React 18.2.0</strong>: 컴포넌트 기반 UI</li><li><strong>CSS</strong>: 스타일링 및 애니메이션</li><li><strong>LocalStorage</strong>: 게임 상태 영속성</li></ul><h3 id=backend>Backend<a hidden class=anchor aria-hidden=true href=#backend>#</a></h3><ul><li><strong>FastAPI</strong>: 고성능 Python 웹 프레임워크</li><li><strong>Pydantic</strong>: 데이터 검증 및 직렬화</li><li><strong>Uvicorn</strong>: ASGI 서버</li></ul><h2 id=-핵심-기능-분석>🔧 핵심 기능 분석<a hidden class=anchor aria-hidden=true href=#-핵심-기능-분석>#</a></h2><h3 id=1-게임-로직-backend>1. 게임 로직 (Backend)<a hidden class=anchor aria-hidden=true href=#1-게임-로직-backend>#</a></h3><h4 id=보드-생성-알고리즘>보드 생성 알고리즘<a hidden class=anchor aria-hidden=true href=#보드-생성-알고리즘>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>create_initial_board</span><span class=p>()</span> <span class=o>-&gt;</span> <span class=n>List</span><span class=p>[</span><span class=n>List</span><span class=p>[</span><span class=n>Optional</span><span class=p>[</span><span class=nb>int</span><span class=p>]]]:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 1-9까지 각 숫자를 최소 2번씩 보장</span>
+</span></span><span class=line><span class=cl>    <span class=n>numbers</span> <span class=o>=</span> <span class=p>[</span><span class=n>i</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>10</span><span class=p>)]</span> <span class=o>*</span> <span class=mi>2</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 나머지 17개 숫자를 랜덤으로 추가</span>
+</span></span><span class=line><span class=cl>    <span class=n>remaining_numbers</span> <span class=o>=</span> <span class=p>[</span><span class=n>random</span><span class=o>.</span><span class=n>randint</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>9</span><span class=p>)</span> <span class=k>for</span> <span class=n>_</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>17</span><span class=p>)]</span>
+</span></span><span class=line><span class=cl>    <span class=n>numbers</span><span class=o>.</span><span class=n>extend</span><span class=p>(</span><span class=n>remaining_numbers</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 3행 9열 + 1행 8열 구조로 배치</span>
+</span></span><span class=line><span class=cl>    <span class=n>board</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>3</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>board</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>numbers</span><span class=p>[</span><span class=n>i</span><span class=o>*</span><span class=mi>9</span><span class=p>:(</span><span class=n>i</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span><span class=o>*</span><span class=mi>9</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    <span class=n>board</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>numbers</span><span class=p>[</span><span class=mi>27</span><span class=p>:</span><span class=mi>35</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>board</span>
+</span></span></code></pre></div><h4 id=매칭-검증-로직>매칭 검증 로직<a hidden class=anchor aria-hidden=true href=#매칭-검증-로직>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>can_remove</span><span class=p>(</span><span class=n>board</span><span class=p>,</span> <span class=n>pos1</span><span class=p>,</span> <span class=n>pos2</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=nb>bool</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 1. 같은 숫자이거나 합이 10인지 확인</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>num1</span> <span class=o>!=</span> <span class=n>num2</span> <span class=ow>and</span> <span class=n>num1</span> <span class=o>+</span> <span class=n>num2</span> <span class=o>!=</span> <span class=mi>10</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=kc>False</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 2. 인접하거나 경로가 막히지 않았는지 확인</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>is_adjacent_or_clear_path</span><span class=p>(</span><span class=n>board</span><span class=p>,</span> <span class=n>pos1</span><span class=p>,</span> <span class=n>pos2</span><span class=p>)</span>
+</span></span></code></pre></div><h3 id=2-상태-관리-frontend>2. 상태 관리 (Frontend)<a hidden class=anchor aria-hidden=true href=#2-상태-관리-frontend>#</a></h3><h4 id=localstorage-기반-영속성>LocalStorage 기반 영속성<a hidden class=anchor aria-hidden=true href=#localstorage-기반-영속성>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>const</span> <span class=nx>saveGameState</span> <span class=o>=</span> <span class=p>(</span><span class=nx>gameState</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>localStorage</span><span class=p>.</span><span class=nx>setItem</span><span class=p>(</span><span class=nx>GAME_STORAGE_KEY</span><span class=p>,</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>stringify</span><span class=p>(</span><span class=nx>gameState</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>loadGameState</span> <span class=o>=</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kr>const</span> <span class=nx>savedState</span> <span class=o>=</span> <span class=nx>localStorage</span><span class=p>.</span><span class=nx>getItem</span><span class=p>(</span><span class=nx>GAME_STORAGE_KEY</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=nx>savedState</span> <span class=o>?</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>parse</span><span class=p>(</span><span class=nx>savedState</span><span class=p>)</span> <span class=o>:</span> <span class=kc>null</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><h4 id=컴포넌트-상태-관리>컴포넌트 상태 관리<a hidden class=anchor aria-hidden=true href=#컴포넌트-상태-관리>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>const</span> <span class=p>[</span><span class=nx>game</span><span class=p>,</span> <span class=nx>setGame</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>(</span><span class=kc>null</span><span class=p>);</span>           <span class=c1>// 게임 상태
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=p>[</span><span class=nx>selectedCells</span><span class=p>,</span> <span class=nx>setSelectedCells</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>([]);</span> <span class=c1>// 선택된 셀들
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=p>[</span><span class=nx>isLoading</span><span class=p>,</span> <span class=nx>setIsLoading</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span> <span class=c1>// 로딩 상태
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=p>[</span><span class=nx>soundOn</span><span class=p>,</span> <span class=nx>setSoundOn</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span>     <span class=c1>// 사운드 설정
+</span></span></span></code></pre></div><h3 id=3-애니메이션-시스템>3. 애니메이션 시스템<a hidden class=anchor aria-hidden=true href=#3-애니메이션-시스템>#</a></h3><h4 id=css-애니메이션-클래스>CSS 애니메이션 클래스<a hidden class=anchor aria-hidden=true href=#css-애니메이션-클래스>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-css data-lang=css><span class=line><span class=cl><span class=p>.</span><span class=nc>shake</span> <span class=p>{</span> <span class=k>animation</span><span class=p>:</span> <span class=n>shake</span> <span class=mf>0.5</span><span class=kt>s</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>.</span><span class=nc>fade-out</span> <span class=p>{</span> <span class=k>animation</span><span class=p>:</span> <span class=n>fadeOut</span> <span class=mf>0.3</span><span class=kt>s</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>.</span><span class=nc>success</span> <span class=p>{</span> <span class=k>animation</span><span class=p>:</span> <span class=n>success</span> <span class=mf>0.5</span><span class=kt>s</span><span class=p>;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>.</span><span class=nc>new-cell</span> <span class=p>{</span> <span class=k>animation</span><span class=p>:</span> <span class=n>newCell</span> <span class=mf>0.5</span><span class=kt>s</span><span class=p>;</span> <span class=p>}</span>
+</span></span></code></pre></div><h4 id=애니메이션-상태-관리>애니메이션 상태 관리<a hidden class=anchor aria-hidden=true href=#애니메이션-상태-관리>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>const</span> <span class=p>[</span><span class=nx>shakeBoard</span><span class=p>,</span> <span class=nx>setShakeBoard</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>(</span><span class=kc>false</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=p>[</span><span class=nx>removedCells</span><span class=p>,</span> <span class=nx>setRemovedCells</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>([]);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=p>[</span><span class=nx>successCells</span><span class=p>,</span> <span class=nx>setSuccessCells</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>([]);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=p>[</span><span class=nx>newCells</span><span class=p>,</span> <span class=nx>setNewCells</span><span class=p>]</span> <span class=o>=</span> <span class=nx>useState</span><span class=p>([]);</span>
+</span></span></code></pre></div><h3 id=4-사운드-시스템>4. 사운드 시스템<a hidden class=anchor aria-hidden=true href=#4-사운드-시스템>#</a></h3><h4 id=web-audio-api-활용>Web Audio API 활용<a hidden class=anchor aria-hidden=true href=#web-audio-api-활용>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>class</span> <span class=nx>SoundEffects</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>constructor</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>audioContext</span> <span class=o>=</span> <span class=k>new</span> <span class=p>(</span><span class=nb>window</span><span class=p>.</span><span class=nx>AudioContext</span> <span class=o>||</span> <span class=nb>window</span><span class=p>.</span><span class=nx>webkitAudioContext</span><span class=p>)();</span>
+</span></span><span class=line><span class=cl>    <span class=k>this</span><span class=p>.</span><span class=nx>muted</span> <span class=o>=</span> <span class=kc>false</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=nx>click</span><span class=p>()</span> <span class=p>{</span> <span class=cm>/* 클릭 사운드 */</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nx>pop</span><span class=p>()</span> <span class=p>{</span> <span class=cm>/* 팝 사운드 */</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nx>success</span><span class=p>()</span> <span class=p>{</span> <span class=cm>/* 성공 사운드 */</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nx>error</span><span class=p>()</span> <span class=p>{</span> <span class=cm>/* 에러 사운드 */</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=nx>win</span><span class=p>()</span> <span class=p>{</span> <span class=cm>/* 승리 사운드 */</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><h2 id=-데이터-플로우>🔄 데이터 플로우<a hidden class=anchor aria-hidden=true href=#-데이터-플로우>#</a></h2><h3 id=1-게임-시작>1. 게임 시작<a hidden class=anchor aria-hidden=true href=#1-게임-시작>#</a></h3><pre tabindex=0><code>1. React App 마운트
+2. LocalStorage에서 저장된 상태 확인
+3. 저장된 상태가 있으면 복원, 없으면 새 게임 시작
+4. FastAPI /start 엔드포인트 호출
+5. 초기 보드 생성 및 반환
+6. 게임 상태를 LocalStorage에 저장
+</code></pre><h3 id=2-숫자-제거>2. 숫자 제거<a hidden class=anchor aria-hidden=true href=#2-숫자-제거>#</a></h3><pre tabindex=0><code>1. 사용자가 두 셀 선택
+2. 선택된 셀들의 유효성 검사
+3. FastAPI /remove 엔드포인트 호출
+4. 백엔드에서 매칭 규칙 검증
+5. 성공 시 보드 업데이트, 실패 시 에러 애니메이션
+6. 업데이트된 상태를 LocalStorage에 저장
+</code></pre><h3 id=3-숫자-추가>3. 숫자 추가<a hidden class=anchor aria-hidden=true href=#3-숫자-추가>#</a></h3><pre tabindex=0><code>1. 사용자가 &#34;Add Numbers&#34; 버튼 클릭
+2. FastAPI /add 엔드포인트 호출
+3. 백엔드에서 새로운 숫자들 생성
+4. 보드에 새 숫자들 추가
+5. 애니메이션 효과와 함께 UI 업데이트
+</code></pre><h2 id=-uiux-설계>🎨 UI/UX 설계<a hidden class=anchor aria-hidden=true href=#-uiux-설계>#</a></h2><h3 id=컴포넌트-계층-구조>컴포넌트 계층 구조<a hidden class=anchor aria-hidden=true href=#컴포넌트-계층-구조>#</a></h3><pre tabindex=0><code>App
+├── Board
+│   └── NumberCell (여러 개)
+├── Controls
+└── HowToPlayModal
+</code></pre><h3 id=반응형-디자인>반응형 디자인<a hidden class=anchor aria-hidden=true href=#반응형-디자인>#</a></h3><ul><li>CSS Grid를 활용한 유연한 보드 레이아웃</li><li>모바일 친화적인 터치 인터페이스</li><li>다양한 화면 크기에 대응하는 반응형 디자인</li></ul><h3 id=접근성-고려사항>접근성 고려사항<a hidden class=anchor aria-hidden=true href=#접근성-고려사항>#</a></h3><ul><li>키보드 네비게이션 지원</li><li>스크린 리더 호환성</li><li>색상 대비 및 가독성 최적화</li></ul><h2 id=-성능-최적화>🚀 성능 최적화<a hidden class=anchor aria-hidden=true href=#-성능-최적화>#</a></h2><h3 id=1-메모리-관리>1. 메모리 관리<a hidden class=anchor aria-hidden=true href=#1-메모리-관리>#</a></h3><ul><li>불필요한 리렌더링 방지를 위한 React.memo 활용</li><li>애니메이션 상태의 적절한 정리</li><li>LocalStorage 사용량 최적화</li></ul><h3 id=2-네트워크-최적화>2. 네트워크 최적화<a hidden class=anchor aria-hidden=true href=#2-네트워크-최적화>#</a></h3><ul><li>Stateless 백엔드 설계로 서버 리소스 절약</li><li>필요한 데이터만 전송하는 효율적인 API 설계</li><li>에러 처리 및 재시도 로직</li></ul><h3 id=3-사용자-경험>3. 사용자 경험<a hidden class=anchor aria-hidden=true href=#3-사용자-경험>#</a></h3><ul><li>로딩 상태 표시</li><li>즉각적인 피드백 (애니메이션, 사운드)</li><li>게임 상태 자동 저장</li></ul><h2 id=-보안-고려사항>🔒 보안 고려사항<a hidden class=anchor aria-hidden=true href=#-보안-고려사항>#</a></h2><h3 id=1-입력-검증>1. 입력 검증<a hidden class=anchor aria-hidden=true href=#1-입력-검증>#</a></h3><ul><li>프론트엔드와 백엔드 양쪽에서 유효성 검사</li><li>XSS 공격 방지를 위한 데이터 이스케이핑</li><li>API 요청의 적절한 검증</li></ul><h3 id=2-데이터-보호>2. 데이터 보호<a hidden class=anchor aria-hidden=true href=#2-데이터-보호>#</a></h3><ul><li>민감한 정보는 서버에 저장하지 않음</li><li>LocalStorage 사용 시 데이터 무결성 확인</li><li>클라이언트 사이드 보안 고려사항</li></ul><h2 id=-확장-가능성>📊 확장 가능성<a hidden class=anchor aria-hidden=true href=#-확장-가능성>#</a></h2><h3 id=1-기능-확장>1. 기능 확장<a hidden class=anchor aria-hidden=true href=#1-기능-확장>#</a></h3><ul><li>멀티플레이어 지원</li><li>리더보드 시스템</li><li>다양한 게임 모드</li><li>난이도 조절</li></ul><h3 id=2-기술적-확장>2. 기술적 확장<a hidden class=anchor aria-hidden=true href=#2-기술적-확장>#</a></h3><ul><li>WebSocket을 통한 실시간 기능</li><li>PWA(Progressive Web App) 지원</li><li>오프라인 플레이 기능</li><li>데이터베이스 연동</li></ul><h2 id=-개발-철학>🎯 개발 철학<a hidden class=anchor aria-hidden=true href=#-개발-철학>#</a></h2><h3 id=1-단순함-simplicity>1. 단순함 (Simplicity)<a hidden class=anchor aria-hidden=true href=#1-단순함-simplicity>#</a></h3><ul><li>복잡한 상태 관리 라이브러리 대신 React 기본 기능 활용</li><li>명확하고 이해하기 쉬운 코드 구조</li><li>최소한의 의존성</li></ul><h3 id=2-사용자-중심-user-centric>2. 사용자 중심 (User-Centric)<a hidden class=anchor aria-hidden=true href=#2-사용자-중심-user-centric>#</a></h3><ul><li>직관적인 게임 인터페이스</li><li>즉각적인 피드백과 애니메이션</li><li>게임 상태의 자동 저장</li></ul><h3 id=3-성능-최적화-performance>3. 성능 최적화 (Performance)<a hidden class=anchor aria-hidden=true href=#3-성능-최적화-performance>#</a></h3><ul><li>효율적인 렌더링</li><li>최적화된 애니메이션</li><li>빠른 응답 시간</li></ul><h2 id=-결론>📝 결론<a hidden class=anchor aria-hidden=true href=#-결론>#</a></h2><p>Number Game은 현대적인 웹 개발 기술을 활용하여 만든 완성도 높은 퍼즐 게임입니다. React와 FastAPI의 조합으로 성능과 개발 경험을 모두 만족시키는 아키텍처를 구축했으며, LocalStorage를 활용한 상태 관리와 다양한 애니메이션 효과로 사용자에게 매력적인 게임 경험을 제공합니다.</p><p>이 프로젝트는 작은 규모이지만 확장 가능한 구조를 가지고 있어, 향후 다양한 기능 추가나 개선이 용이한 설계를 보여줍니다.</p><hr><p><em>이 글은 Number Game 프로젝트의 기술적 구조와 설계 철학을 분석한 내용입니다. 실제 코드와 더 자세한 구현 세부사항은 프로젝트 저장소를 참조하시기 바랍니다.</em></p></div><footer class=post-footer><ul class=post-tags></ul><nav class=paginav><a class=prev href=http://localhost:64609/posts/vibe-coding-game/post/><span class=title>« Prev</span><br><span>My 1st post</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=http://localhost:64609/>mori-blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
