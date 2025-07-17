@@ -1,4 +1,4 @@
-baseURL: "https://moripiri.github.io"
+baseURL: "https://moripiri.github.io/"
 title: mori-blog
 pagination:
   paperSize: 5
