@@ -2,61 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/posts/vibe-coding-game/</loc>
-    <lastmod>2025-07-15T11:30:03+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url><url>
-    <loc>http://localhost:1313/posts/sutton-rl-book-cheatsheet/</loc>
+    <loc>https://moripiri.github.io/posts/sutton-rl-book-cheatsheet/</loc>
     <lastmod>2025-06-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/game/</loc>
+    <loc>https://moripiri.github.io/</loc>
     <lastmod>2025-07-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://moripiri.github.io/posts/</loc>
     <lastmod>2025-07-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2025-07-15T11:30:03+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
-    <lastmod>2025-07-15T11:30:03+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url><url>
-    <loc>http://localhost:1313/tags/vibe-coding/</loc>
-    <lastmod>2025-07-15T11:30:03+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url><url>
-    <loc>http://localhost:1313/tags/hugo/</loc>
+    <loc>https://moripiri.github.io/tags/hugo/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/posts/my-first-post/</loc>
+    <loc>https://moripiri.github.io/tags/</loc>
     <lastmod>2025-06-22T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/tags/rl/</loc>
+    <loc>https://moripiri.github.io/posts/my-first-post/</loc>
+    <lastmod>2025-06-22T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://moripiri.github.io/tags/rl/</loc>
     <lastmod>2025-06-15T11:30:03+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://moripiri.github.io/categories/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>https://moripiri.github.io/search/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
