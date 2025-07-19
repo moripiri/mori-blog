@@ -8,7 +8,7 @@ author: "mori"
 # author: ["Me", "You"] # multiple authors
 showToc: true
 TocOpen: false
-draft: true
+draft: false
 hidemeta: false
 comments: false
 description: "웹 개발 모르는 자의 후기"
