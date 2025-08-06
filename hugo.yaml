@@ -146,6 +146,10 @@ markup:
     renderer:
       unsafe: true
 sitemap:
-  changeFreq: "daily"
-  priority: 0.5
+  changeFreq: ""
+  disable: false
   filename: sitemap.xml
+  priority: -1
+services:
+  googleAnalytics:
+    id: G-18KKC7TB58
